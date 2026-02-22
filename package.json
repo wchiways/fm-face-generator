@@ -1,7 +1,7 @@
 {
   "name": "gunzo-faces",
   "private": true,
-  "version": "24.2.0",
+  "version": "26.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

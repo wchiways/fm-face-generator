@@ -84,7 +84,7 @@ export default function PreviewPanel() {
           ref={canvasRef}
           width={350}
           height={350}
-          className="rounded-xl border border-border bg-muted/20"
+          className="rounded-xl border border-border bg-muted/20 w-full max-w-[350px] h-auto"
         />
       </div>
 

@@ -138,7 +138,7 @@ export default function ImageUploader() {
       {/* 裁剪区域 */}
       <div
         ref={dropZoneRef}
-        className="relative w-[350px] h-[350px] rounded-xl border-2 border-dashed border-border bg-muted/30 transition-all overflow-hidden"
+        className="relative w-full max-w-[350px] aspect-square rounded-xl border-2 border-dashed border-border bg-muted/30 transition-all overflow-hidden"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -151,7 +151,6 @@ export default function ImageUploader() {
               zoom={state.zoom}
               rotation={state.rotation}
               aspect={1}
-              cropSize={{ width: 350, height: 350 }}
               objectFit="horizontal-cover"
               onCropChange={setCrop}
               onZoomChange={(z) => dispatch({ type: 'SET_ZOOM', zoom: z })}
@@ -184,7 +183,7 @@ export default function ImageUploader() {
       </div>
 
       {/* 缩放控制 */}
-      <div className="flex items-center gap-3 w-[350px]">
+      <div className="flex items-center gap-3 w-full max-w-[350px]">
         <span className="text-xs text-muted-foreground">-</span>
         <Slider
           min={1}
