@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { useAppState } from '@/context/AppContext'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -6,7 +6,7 @@ import { SimpleSelect, SelectOption } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { Cog, Images } from 'lucide-react'
+import { Cog, Images, FileUp, Upload, X } from 'lucide-react'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { validateImageFile, readFileAsDataURL, centerCropToSquare, canvasToBlob, parseCsvMapping, getFileNameWithoutExt } from '@/lib/batch-utils'
@@ -16,18 +16,75 @@ import { useToast } from '@/components/ui/toast'
 export default function BatchSection() {
   const { state, dispatch } = useAppState()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const csvInputRef = useRef<HTMLInputElement>(null)
+  const [batchFiles, setBatchFiles] = useState<File[]>([])
+  const [dragging, setDragging] = useState(false)
   const toast = useToast()
 
+  const addFiles = useCallback((incoming: FileList | File[]) => {
+    const arr = Array.from(incoming)
+    setBatchFiles((prev) => {
+      // 按文件名去重
+      const existing = new Set(prev.map((f) => f.name))
+      const newFiles = arr.filter((f) => !existing.has(f.name))
+      return [...prev, ...newFiles]
+    })
+  }, [])
+
+  const removeFile = useCallback((name: string) => {
+    setBatchFiles((prev) => prev.filter((f) => f.name !== name))
+  }, [])
+
+  const clearFiles = useCallback(() => {
+    setBatchFiles([])
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }, [])
+
+  const handleDropZoneDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragging(false)
+    if (e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files)
+    }
+  }, [addFiles])
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(e.target.files)
+    }
+    e.target.value = ''
+  }, [addFiles])
+
+  const handleCsvUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
+      toast.error('请上传 .csv 或 .txt 格式的文件')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      if (text) {
+        dispatch({ type: 'SET_BATCH_CSV', text })
+        toast.success(`已导入 CSV 文件: ${file.name}`)
+      }
+    }
+    reader.onerror = () => toast.error('CSV 文件读取失败')
+    reader.readAsText(file)
+    // 重置 input 以便重复选择同一文件
+    e.target.value = ''
+  }, [dispatch, toast])
+
   const handleBatchGenerate = useCallback(async () => {
-    const files = fileInputRef.current?.files
-    if (!files || files.length === 0) {
+    if (batchFiles.length === 0) {
       toast.warning('请先选择要批量处理的图片文件')
       return
     }
 
     // 验证所有文件
-    for (let i = 0; i < files.length; i++) {
-      const error = validateImageFile(files[i])
+    for (const file of batchFiles) {
+      const error = validateImageFile(file)
       if (error) {
         toast.error(error)
         return
@@ -44,7 +101,7 @@ export default function BatchSection() {
       csvMap = parseCsvMapping(state.batchCsvText)
     }
 
-    const total = files.length
+    const total = batchFiles.length
     dispatch({
       type: 'SET_BATCH_PROGRESS',
       progress: { status: 'processing', total, current: 0, successCount: 0, currentFile: '' },
@@ -55,7 +112,7 @@ export default function BatchSection() {
     let successCount = 0
 
     for (let i = 0; i < total; i++) {
-      const file = files[i]
+      const file = batchFiles[i]
       dispatch({
         type: 'SET_BATCH_PROGRESS',
         progress: { current: i, currentFile: file.name },
@@ -111,7 +168,7 @@ export default function BatchSection() {
       })
       toast.error('ZIP 打包失败，请重试')
     }
-  }, [state.batchNameMode, state.batchCsvText, state.settings, state.exportFormat, state.exportQuality, dispatch, toast])
+  }, [batchFiles, state.batchNameMode, state.batchCsvText, state.settings, state.exportFormat, state.exportQuality, dispatch, toast])
 
   const { batchProgress } = state
   const progressPct = batchProgress.total > 0
@@ -142,15 +199,68 @@ export default function BatchSection() {
       </h4>
 
       <div className="space-y-1.5">
-        <Label htmlFor="batch-input">选择多张图片</Label>
-        <input
-          ref={fileInputRef}
-          id="batch-input"
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/gif,image/webp"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
-        />
+        <Label>选择多张图片</Label>
+        <div
+          className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 transition-colors cursor-pointer ${
+            dragging
+              ? 'border-primary bg-primary/5'
+              : 'border-border hover:border-muted-foreground/40'
+          }`}
+          onClick={() => fileInputRef.current?.click()}
+          onDrop={handleDropZoneDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+          onDragLeave={(e) => { e.preventDefault(); setDragging(false) }}
+        >
+          <Upload className="h-8 w-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            拖拽图片到此处，或点击选择文件
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            支持 JPG / PNG / GIF / WebP
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            className="hidden"
+            onChange={handleInputChange}
+          />
+        </div>
+
+        {batchFiles.length > 0 && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                已选择 {batchFiles.length} 张图片
+              </span>
+              <button
+                type="button"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                onClick={clearFiles}
+              >
+                清空全部
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {batchFiles.map((f) => (
+                <span
+                  key={f.name}
+                  className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                >
+                  {f.name}
+                  <button
+                    type="button"
+                    className="hover:text-foreground cursor-pointer"
+                    onClick={(e) => { e.stopPropagation(); removeFile(f.name) }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -168,7 +278,25 @@ export default function BatchSection() {
 
       {state.batchNameMode === 'csv' && (
         <div className="space-y-1.5">
-          <Label htmlFor="batch-csv">CSV 映射数据</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="batch-csv">CSV 映射数据</Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 text-xs"
+              onClick={() => csvInputRef.current?.click()}
+            >
+              <FileUp className="h-3.5 w-3.5" />
+              导入 CSV
+            </Button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,.txt"
+              className="hidden"
+              onChange={handleCsvUpload}
+            />
+          </div>
           <Textarea
             id="batch-csv"
             rows={4}
