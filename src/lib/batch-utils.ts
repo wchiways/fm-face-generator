@@ -45,11 +45,16 @@ export function centerCropToSquare(dataUrl: string, size: number): Promise<strin
   })
 }
 
-export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+export function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  format: 'png' | 'jpeg' = 'png',
+  quality?: number
+): Promise<Blob> {
   return new Promise((resolve) => {
+    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png'
     canvas.toBlob((blob) => {
       resolve(blob!)
-    }, 'image/png')
+    }, mimeType, format === 'jpeg' ? quality : undefined)
   })
 }
 

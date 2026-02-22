@@ -1,11 +1,13 @@
 import { createContext, useContext, useReducer, type ReactNode } from 'react'
-import type { FaceSettings, BatchProgress } from '@/types'
+import type { FaceSettings, BatchProgress, ExportFormat } from '@/types'
 
 interface AppState {
   settings: FaceSettings
   croppedImage: string | null
   fileName: string
   saveFileName: string
+  exportFormat: ExportFormat
+  exportQuality: number
   batchNameMode: 'filename' | 'fixed' | 'csv'
   batchCsvText: string
   batchProgress: BatchProgress
@@ -27,6 +29,8 @@ const initialState: AppState = {
   croppedImage: null,
   fileName: '',
   saveFileName: '',
+  exportFormat: 'png',
+  exportQuality: 0.92,
   batchNameMode: 'filename',
   batchCsvText: '',
   batchProgress: {
@@ -47,6 +51,8 @@ type Action =
   | { type: 'SET_CROPPED_IMAGE'; image: string | null }
   | { type: 'SET_FILE_NAME'; name: string }
   | { type: 'SET_SAVE_FILE_NAME'; name: string }
+  | { type: 'SET_EXPORT_FORMAT'; format: ExportFormat }
+  | { type: 'SET_EXPORT_QUALITY'; quality: number }
   | { type: 'SET_BATCH_NAME_MODE'; mode: 'filename' | 'fixed' | 'csv' }
   | { type: 'SET_BATCH_CSV'; text: string }
   | { type: 'SET_BATCH_PROGRESS'; progress: Partial<BatchProgress> }
@@ -70,6 +76,10 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, fileName: action.name }
     case 'SET_SAVE_FILE_NAME':
       return { ...state, saveFileName: action.name }
+    case 'SET_EXPORT_FORMAT':
+      return { ...state, exportFormat: action.format }
+    case 'SET_EXPORT_QUALITY':
+      return { ...state, exportQuality: action.quality }
     case 'SET_BATCH_NAME_MODE':
       return { ...state, batchNameMode: action.mode }
     case 'SET_BATCH_CSV':

@@ -1,9 +1,11 @@
 import { useAppState } from '@/context/AppContext'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Slider } from '@/components/ui/slider'
 import { Select, SimpleSelect, SelectOption } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { countries } from '@/data/countries'
-import { potentialOptions, filterOptions, fontWidthOptions, fontColorOptions } from '@/data/form-options'
+import { potentialOptions, filterOptions, fontWidthOptions, fontColorOptions, exportFormatOptions } from '@/data/form-options'
 
 export default function SettingsForm() {
   const { state, dispatch } = useAppState()
@@ -102,6 +104,38 @@ export default function SettingsForm() {
           onChange={(e) => dispatch({ type: 'SET_SETTING', key: 'sign', value: e.target.value })}
         />
       </div>
+
+      <Separator />
+
+      {/* 导出格式 */}
+      <div className="space-y-1.5">
+        <Label>导出格式</Label>
+        <SimpleSelect
+          value={state.exportFormat}
+          onValueChange={(v) => dispatch({ type: 'SET_EXPORT_FORMAT', format: v as 'png' | 'jpeg' })}
+        >
+          {exportFormatOptions.map((opt) => (
+            <SelectOption key={opt.value} value={opt.value}>{opt.label}</SelectOption>
+          ))}
+        </SimpleSelect>
+      </div>
+
+      {/* JPEG 质量滑块 — 仅 JPEG 时显示 */}
+      {state.exportFormat === 'jpeg' && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Label>JPEG 质量</Label>
+            <span className="text-xs text-muted-foreground">{Math.round(state.exportQuality * 100)}%</span>
+          </div>
+          <Slider
+            min={0.5}
+            max={1}
+            step={0.01}
+            value={state.exportQuality}
+            onValueChange={(v) => dispatch({ type: 'SET_EXPORT_QUALITY', quality: v })}
+          />
+        </div>
+      )}
     </div>
   )
 }

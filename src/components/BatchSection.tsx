@@ -81,8 +81,9 @@ export default function BatchSection() {
         const settings = { ...state.settings, name: playerName }
         await renderFace(croppedDataUrl, settings, offCanvas)
 
-        const blob = await canvasToBlob(offCanvas)
-        imgFolder.file(getFileNameWithoutExt(file.name) + '.png', blob)
+        const blob = await canvasToBlob(offCanvas, state.exportFormat, state.exportQuality)
+        const ext = state.exportFormat === 'jpeg' ? '.jpg' : '.png'
+        imgFolder.file(getFileNameWithoutExt(file.name) + ext, blob)
         successCount++
       } catch (err) {
         console.error('处理文件失败:', file.name, err)
@@ -110,7 +111,7 @@ export default function BatchSection() {
       })
       toast.error('ZIP 打包失败，请重试')
     }
-  }, [state.batchNameMode, state.batchCsvText, state.settings, dispatch, toast])
+  }, [state.batchNameMode, state.batchCsvText, state.settings, state.exportFormat, state.exportQuality, dispatch, toast])
 
   const { batchProgress } = state
   const progressPct = batchProgress.total > 0

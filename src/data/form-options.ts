@@ -1,4 +1,4 @@
-import type { PotentialOption, FilterOption, FontWidthOption, FontColorOption } from '@/types'
+import type { PotentialOption, FilterOption, FontWidthOption, FontColorOption, ExportFormat } from '@/types'
 
 export const potentialOptions: PotentialOption[] = [
   { value: "filter/filter1.png", label: "---潜力设置---", group: "header", disabled: true },
@@ -81,4 +81,9 @@ export const fontColorOptions: FontColorOption[] = [
   { value: "#b0e0e6", label: "#b0e0e6" },
   { value: "#f0c27b", label: "#f0c27b" },
   { value: "#abbaab", label: "Metallic Toad" },
+]
+
+export const exportFormatOptions: { value: ExportFormat; label: string }[] = [
+  { value: 'png', label: 'PNG 无损' },
+  { value: 'jpeg', label: 'JPEG 有损（体积更小）' },
 ]

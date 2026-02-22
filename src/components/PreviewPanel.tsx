@@ -55,13 +55,21 @@ export default function PreviewPanel() {
     const canvas = canvasRef.current
     if (!canvas) return
 
+    const isPng = state.exportFormat === 'png'
+    const mimeType = isPng ? 'image/png' : 'image/jpeg'
+    const ext = isPng ? '.png' : '.jpg'
+
     const link = document.createElement('a')
-    link.href = canvas.toDataURL('image/png')
-    const fileName = state.saveFileName || state.fileName || 'gunzo-face'
-    link.download = fileName.endsWith('.png') ? fileName : `${fileName}.png`
+    link.href = isPng
+      ? canvas.toDataURL(mimeType)
+      : canvas.toDataURL(mimeType, state.exportQuality)
+    const baseName = state.saveFileName || state.fileName || 'gunzo-face'
+    // 去掉已有后缀再加正确的
+    const nameWithoutExt = baseName.replace(/\.(png|jpe?g)$/i, '')
+    link.download = `${nameWithoutExt}${ext}`
     link.click()
     toast.success('图片已开始下载')
-  }, [state.saveFileName, state.fileName, toast])
+  }, [state.saveFileName, state.fileName, state.exportFormat, state.exportQuality, toast])
 
   return (
     <div className="flex flex-col gap-4">

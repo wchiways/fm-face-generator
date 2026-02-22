@@ -1,3 +1,5 @@
+export type ExportFormat = 'png' | 'jpeg'
+
 export interface FaceSettings {
   name: string
   nationImgSrc: string
