@@ -292,8 +292,10 @@ export async function renderFace(
   ctx.drawImage(img2, 0, 0, canvas.width, canvas.height)
 
   // 6. 潜力徽章
-  const img3 = await loadImg(POTEN)
-  ctx.drawImage(img3, 0, 0, canvas.width, canvas.height)
+  if (POTEN && POTEN !== 'none') {
+    const img3 = await loadImg(POTEN)
+    ctx.drawImage(img3, 0, 0, canvas.width, canvas.height)
+  }
 
   // 7. 占位滤镜
   await loadImg('filter/filter1.png')

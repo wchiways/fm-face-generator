@@ -6,7 +6,7 @@ export default function Header() {
       <div className="flex items-center gap-3">
         <img src="/filter/flayus.svg" alt="Flayus Logo" className="h-10" />
         <h1 className="text-lg font-bold text-foreground">
-          GZ生成器 <span className="text-xs text-muted-foreground font-normal">V26.0.7</span>
+          GZ生成器 <span className="text-xs text-muted-foreground font-normal">V26.0.8</span>
         </h1>
         <ChangelogDialog />
       </div>

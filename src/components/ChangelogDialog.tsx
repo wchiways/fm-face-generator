@@ -17,6 +17,15 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: 'v26.0.8',
+    date: '2026-02-22',
+    tag: 'feature',
+    items: [
+      '潜力（勋章）新增「无潜力」选项，默认不绘制潜力徽章',
+      '初始状态与原始样式保持一致',
+    ],
+  },
+  {
     version: 'v26.0.7',
     date: '2026-02-22',
     tag: 'feature',

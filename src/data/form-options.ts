@@ -2,6 +2,7 @@ import type { PotentialOption, FilterOption, FontWidthOption, FontColorOption, E
 
 export const potentialOptions: PotentialOption[] = [
   { value: "filter/filter1.png", label: "---潜力设置---", group: "header", disabled: true },
+  { value: "none", label: "无潜力", group: "none" },
   // 固定潜力
   { value: "", label: "固定潜力", group: "fixed-header", disabled: true },
   { value: "images/poten/reboot/180.png", label: "180以上", group: "fixed" },

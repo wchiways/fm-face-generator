@@ -20,7 +20,7 @@ const initialState: AppState = {
   settings: {
     name: 'Mr.Toni',
     nationImgSrc: './images/China.png',
-    poten: 'filter/filter1.png',
+    poten: 'none',
     filter: 'filter/filter1.png',
     fontFilter: '#ffd700',
     fontWidth: 'base',

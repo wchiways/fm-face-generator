@@ -40,7 +40,7 @@ export default function SettingsForm() {
       <div className="space-y-1.5">
         <Label>潜力（勋章）</Label>
         <Select
-          defaultValue="filter/filter1.png"
+          defaultValue="none"
           onValueChange={(v) => dispatch({ type: 'SET_SETTING', key: 'poten', value: v })}
           options={potentialOptions}
           placeholder="选择潜力..."
