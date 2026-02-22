@@ -152,7 +152,7 @@ export default function ImageUploader() {
               rotation={state.rotation}
               aspect={1}
               cropSize={{ width: 350, height: 350 }}
-              objectFit="auto-cover"
+              objectFit="horizontal-cover"
               onCropChange={setCrop}
               onZoomChange={(z) => dispatch({ type: 'SET_ZOOM', zoom: z })}
               onCropComplete={onCropComplete}
