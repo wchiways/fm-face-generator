@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { AppProvider } from '@/context/AppContext'
 import { ToastProvider } from '@/components/ui/toast'
 import Header from '@/components/Header'
@@ -9,6 +10,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 function AppContent() {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -26,7 +29,7 @@ function AppContent() {
           {/* 参数设置 */}
           <Card>
             <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-4 text-foreground">参数设置</h3>
+              <h3 className="text-sm font-semibold mb-4 text-foreground">{t('tab.settings')}</h3>
               <SettingsForm />
             </CardContent>
           </Card>
@@ -44,9 +47,9 @@ function AppContent() {
         <div className="md:hidden">
           <Tabs defaultValue="edit">
             <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="edit">图像编辑</TabsTrigger>
-              <TabsTrigger value="settings">参数设置</TabsTrigger>
-              <TabsTrigger value="preview">预览效果</TabsTrigger>
+              <TabsTrigger value="edit">{t('tab.edit')}</TabsTrigger>
+              <TabsTrigger value="settings">{t('tab.settings')}</TabsTrigger>
+              <TabsTrigger value="preview">{t('tab.preview')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="edit">

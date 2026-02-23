@@ -1,15 +1,5 @@
 import type { FaceSettings, NameScript } from '@/types'
-
-// 将 Image.onload 包装为 Promise
-export function loadImg(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = () => reject(new Error('图片加载失败: ' + src))
-    img.src = src
-  })
-}
+import { cachedLoadImg } from '@/lib/resource-cache'
 
 // 基于首字符检测文字系统
 export function detectNameScript(name: string): NameScript {
@@ -267,7 +257,7 @@ export async function renderFace(
   const { name: NAME, nationImgSrc: NATION2, poten: POTEN, filter: FILTER, fontFilter: FONTFILTER, fontWidth: FONTWIDTH, sign: SIGN } = settings
 
   // 1. 绘制用户照片（圆角裁剪）
-  const img = await loadImg(imageData)
+  const img = await cachedLoadImg(imageData)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   roundedImage(ctx, 1.6, 1.6, 346.5, 346.5, 60)
   ctx.clip()
@@ -276,31 +266,25 @@ export async function renderFace(
   ctx.restore()
 
   // 2. 底层边框
-  const filter = await loadImg('filter/og4.png')
+  const filter = await cachedLoadImg('filter/og4.png')
   ctx.drawImage(filter, 0, 0, canvas.width, canvas.height)
 
   // 3. 照片滤镜
-  const imgft = await loadImg(FILTER)
+  const imgft = await cachedLoadImg(FILTER)
   ctx.drawImage(imgft, 0, 0, canvas.width, canvas.height)
   ctx.textAlign = "center"
 
-  // 4. 字体滤镜
-  await loadImg('filter/fontfilter2.png')
-
-  // 5. 国旗
-  const img2 = await loadImg(NATION2)
+  // 4. 国旗
+  const img2 = await cachedLoadImg(NATION2)
   ctx.drawImage(img2, 0, 0, canvas.width, canvas.height)
 
-  // 6. 潜力徽章
+  // 5. 潜力徽章
   if (POTEN && POTEN !== 'none') {
-    const img3 = await loadImg(POTEN)
+    const img3 = await cachedLoadImg(POTEN)
     ctx.drawImage(img3, 0, 0, canvas.width, canvas.height)
   }
 
-  // 7. 占位滤镜
-  await loadImg('filter/filter1.png')
-
-  // 8. 绘制文字和签名
+  // 6. 绘制文字和签名
   drawText(ctx, canvas, canvas, NAME, FONTFILTER, FONTWIDTH, SIGN)
 
   return canvas

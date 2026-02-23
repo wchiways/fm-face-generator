@@ -1,5 +1,6 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
 
@@ -77,6 +78,7 @@ function DialogTrigger({ children, asChild, ...props }: React.ButtonHTMLAttribut
 const DialogContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     const { open, onOpenChange } = React.useContext(DialogContext)
+    const { t } = useTranslation()
 
     if (!open) return null
 
@@ -115,7 +117,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
             onClick={() => onOpenChange(false)}
           >
             <X className="h-4 w-4" />
-            <span className="sr-only">关闭</span>
+            <span className="sr-only">{t('common.close')}</span>
           </button>
         </div>
       </div>,

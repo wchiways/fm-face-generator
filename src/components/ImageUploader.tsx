@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { useAppState } from '@/context/AppContext'
@@ -37,6 +38,7 @@ async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<string>
 
 export default function ImageUploader() {
   const { state, dispatch } = useAppState()
+  const { t } = useTranslation()
   const [imageSrc, setImageSrc] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
@@ -60,7 +62,7 @@ export default function ImageUploader() {
   const handleFileSelect = async (file: File) => {
     const error = validateImageFile(file)
     if (error) {
-      toast.error(error)
+      toast.error(t(error.key, error.params))
       return
     }
     const dataUrl = await readFileAsDataURL(file)
@@ -103,7 +105,7 @@ export default function ImageUploader() {
           className="gap-1.5"
         >
           <Upload className="h-4 w-4" />
-          选择图片
+          {t('upload.selectImage')}
         </Button>
         <input
           ref={fileInputRef}
@@ -174,10 +176,10 @@ export default function ImageUploader() {
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload className="h-12 w-12 mb-3 opacity-40" />
-            <p className="text-sm">1. 点击选择文件</p>
-            <p className="text-sm">2. 调整图片大小</p>
-            <p className="text-sm">3. 设置参数</p>
-            <p className="text-sm">4. 生成头像</p>
+            <p className="text-sm">{t('upload.step1')}</p>
+            <p className="text-sm">{t('upload.step2')}</p>
+            <p className="text-sm">{t('upload.step3')}</p>
+            <p className="text-sm">{t('upload.step4')}</p>
           </div>
         )}
       </div>

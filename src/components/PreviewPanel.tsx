@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAppState } from '@/context/AppContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,7 @@ import { useToast } from '@/components/ui/toast'
 
 export default function PreviewPanel() {
   const { state, dispatch } = useAppState()
+  const { t } = useTranslation()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [generating, setGenerating] = useState(false)
   const toast = useToast()
@@ -34,7 +36,7 @@ export default function PreviewPanel() {
       }
 
       if (!imageData) {
-        toast.warning('请先上传图片')
+        toast.warning(t('preview.uploadFirst'))
         return
       }
 
@@ -42,14 +44,14 @@ export default function PreviewPanel() {
       if (!canvas) return
 
       await renderFace(imageData, state.settings, canvas)
-      toast.success('头像生成成功')
+      toast.success(t('preview.success'))
     } catch (e) {
-      console.error('头像生成失败:', e)
-      toast.error('头像生成失败，请检查设置后重试')
+      console.error('Face generation failed:', e)
+      toast.error(t('preview.failed'))
     } finally {
       setGenerating(false)
     }
-  }, [state.settings, state.croppedImage, generating, dispatch, toast])
+  }, [state.settings, state.croppedImage, generating, dispatch, toast, t])
 
   const handleDownload = useCallback(() => {
     const canvas = canvasRef.current
@@ -68,14 +70,14 @@ export default function PreviewPanel() {
     const nameWithoutExt = baseName.replace(/\.(png|jpe?g)$/i, '')
     link.download = `${nameWithoutExt}${ext}`
     link.click()
-    toast.success('图片已开始下载')
-  }, [state.saveFileName, state.fileName, state.exportFormat, state.exportQuality, toast])
+    toast.success(t('preview.downloadStarted'))
+  }, [state.saveFileName, state.fileName, state.exportFormat, state.exportQuality, toast, t])
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">预览效果</h3>
-        <p className="text-xs text-muted-foreground">右键单击图像可另存为</p>
+        <h3 className="text-sm font-semibold text-foreground">{t('preview.title')}</h3>
+        <p className="text-xs text-muted-foreground">{t('preview.rightClickHint')}</p>
       </div>
 
       {/* Canvas 容器 */}
@@ -91,14 +93,14 @@ export default function PreviewPanel() {
       {/* 操作按钮 */}
       <Button onClick={handleGenerate} disabled={generating} className="w-full gap-2">
         {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-        {generating ? '生成中...' : '生成头像'}
+        {generating ? t('preview.generating') : t('preview.generate')}
       </Button>
 
       <div className="space-y-1.5">
-        <Label htmlFor="save-filename">保存文件名</Label>
+        <Label htmlFor="save-filename">{t('preview.saveFileName')}</Label>
         <Input
           id="save-filename"
-          placeholder="输入保存文件名"
+          placeholder={t('preview.fileNamePlaceholder')}
           value={state.saveFileName}
           onChange={(e) => dispatch({ type: 'SET_SAVE_FILE_NAME', name: e.target.value })}
         />
@@ -106,7 +108,7 @@ export default function PreviewPanel() {
 
       <Button variant="secondary" onClick={handleDownload} className="w-full gap-2">
         <Download className="h-4 w-4" />
-        下载图片
+        {t('preview.download')}
       </Button>
     </div>
   )

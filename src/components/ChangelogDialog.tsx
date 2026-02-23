@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTrigger,
@@ -16,6 +17,22 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [
+  {
+    version: 'v26.0.9',
+    date: '2026-02-23',
+    tag: 'major',
+    items: [
+      '新增 i18n 国际化支持，可切换中文 / English / Español 三种语言',
+      'Header 右侧添加语言切换按钮，语言偏好自动保存至 localStorage',
+      '238 个国家名称、全部设置选项、批量生成文案均已翻译',
+      '图片资源内存缓存机制，避免重复加载同一素材',
+      '字体预加载：HTML <link preload> + document.fonts.load 双重策略',
+      '渲染管线精简：移除 2 个无用图层加载，8 步合并为 6 步',
+      '下拉选择组件搜索框 placeholder 国际化',
+      'SettingsForm 300+ 选项翻译结果 useMemo 缓存，避免每次渲染重新映射',
+      '字体颜色选项标签统一使用 i18n key，新增 4 种渐变色翻译',
+    ],
+  },
   {
     version: 'v26.0.8',
     date: '2026-02-22',
@@ -122,15 +139,9 @@ const tagStyle: Record<string, string> = {
   ui: 'bg-violet-500/20 text-violet-400',
 }
 
-const tagLabel: Record<string, string> = {
-  major: '重大更新',
-  feature: '新功能',
-  fix: '修复',
-  ui: 'UI 优化',
-}
-
 export default function ChangelogDialog() {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -140,13 +151,13 @@ export default function ChangelogDialog() {
           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
         >
           <ScrollText className="h-3.5 w-3.5" />
-          更新日志
+          {t('changelog.button')}
         </button>
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>更新日志</DialogTitle>
+          <DialogTitle>{t('changelog.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="mt-4 -mr-2 pr-2 overflow-y-auto custom-scrollbar space-y-6 flex-1">
@@ -159,7 +170,7 @@ export default function ChangelogDialog() {
                 <span className="text-sm font-semibold text-foreground">{entry.version}</span>
                 {entry.tag && (
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tagStyle[entry.tag]}`}>
-                    {tagLabel[entry.tag]}
+                    {t(`changelog.tag.${entry.tag}`)}
                   </span>
                 )}
                 <span className="text-xs text-muted-foreground/60">{entry.date}</span>

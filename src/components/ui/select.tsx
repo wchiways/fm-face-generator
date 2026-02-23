@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { ChevronDown, Check } from "lucide-react"
 
@@ -31,6 +32,7 @@ function Select({ id, value: controlledValue, defaultValue, onValueChange, place
   const containerRef = React.useRef<HTMLDivElement>(null)
   const listRef = React.useRef<HTMLDivElement>(null)
   const searchRef = React.useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   const value = controlledValue ?? uncontrolledValue
   const selectedOption = options.find(o => o.value === value && !o.disabled)
@@ -99,7 +101,7 @@ function Select({ id, value: controlledValue, defaultValue, onValueChange, place
         )}
       >
         <span className={cn("truncate", !selectedOption && "text-muted-foreground")}>
-          {selectedOption?.label ?? placeholder ?? "请选择..."}
+          {selectedOption?.label ?? placeholder ?? t('common.select')}
         </span>
         <ChevronDown className={cn(
           "ml-2 h-4 w-4 shrink-0 text-muted-foreground transition-transform",
@@ -121,7 +123,7 @@ function Select({ id, value: controlledValue, defaultValue, onValueChange, place
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="搜索..."
+                placeholder={t('common.search')}
                 className="w-full h-7 rounded bg-muted px-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />
             </div>
@@ -135,7 +137,7 @@ function Select({ id, value: controlledValue, defaultValue, onValueChange, place
           >
             {filteredOptions.length === 0 && (
               <div className="px-3 py-2 text-sm text-muted-foreground text-center">
-                无匹配结果
+                {t('common.noMatch')}
               </div>
             )}
             {filteredOptions.map((opt, i) => {
@@ -197,6 +199,7 @@ function SimpleSelect({ id, value: controlledValue, defaultValue, onValueChange,
   const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue ?? "")
   const [open, setOpen] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
   const value = controlledValue ?? uncontrolledValue
 
@@ -241,7 +244,7 @@ function SimpleSelect({ id, value: controlledValue, defaultValue, onValueChange,
         )}
       >
         <span className={cn("truncate", !selectedOption && "text-muted-foreground")}>
-          {selectedOption?.label ?? placeholder ?? "请选择..."}
+          {selectedOption?.label ?? placeholder ?? t('common.select')}
         </span>
         <ChevronDown className={cn(
           "ml-2 h-4 w-4 shrink-0 text-muted-foreground transition-transform",

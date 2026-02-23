@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAppState } from '@/context/AppContext'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -15,6 +16,7 @@ import { useToast } from '@/components/ui/toast'
 
 export default function BatchSection() {
   const { state, dispatch } = useAppState()
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const csvInputRef = useRef<HTMLInputElement>(null)
   const [batchFiles, setBatchFiles] = useState<File[]>([])
@@ -59,7 +61,7 @@ export default function BatchSection() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
-      toast.error('请上传 .csv 或 .txt 格式的文件')
+      toast.error(t('batch.csvUploadError'))
       return
     }
     const reader = new FileReader()
@@ -67,18 +69,18 @@ export default function BatchSection() {
       const text = ev.target?.result as string
       if (text) {
         dispatch({ type: 'SET_BATCH_CSV', text })
-        toast.success(`已导入 CSV 文件: ${file.name}`)
+        toast.success(t('batch.csvImported', { name: file.name }))
       }
     }
-    reader.onerror = () => toast.error('CSV 文件读取失败')
+    reader.onerror = () => toast.error(t('batch.csvReadFailed'))
     reader.readAsText(file)
     // 重置 input 以便重复选择同一文件
     e.target.value = ''
-  }, [dispatch, toast])
+  }, [dispatch, toast, t])
 
   const handleBatchGenerate = useCallback(async () => {
     if (batchFiles.length === 0) {
-      toast.warning('请先选择要批量处理的图片文件')
+      toast.warning(t('batch.selectFirst'))
       return
     }
 
@@ -86,7 +88,7 @@ export default function BatchSection() {
     for (const file of batchFiles) {
       const error = validateImageFile(file)
       if (error) {
-        toast.error(error)
+        toast.error(t(error.key, error.params))
         return
       }
     }
@@ -95,7 +97,7 @@ export default function BatchSection() {
     let csvMap: Record<string, string> = {}
     if (state.batchNameMode === 'csv') {
       if (!state.batchCsvText.trim()) {
-        toast.warning('请填写 CSV 映射数据')
+        toast.warning(t('batch.csvEmpty'))
         return
       }
       csvMap = parseCsvMapping(state.batchCsvText)
@@ -143,7 +145,7 @@ export default function BatchSection() {
         imgFolder.file(getFileNameWithoutExt(file.name) + ext, blob)
         successCount++
       } catch (err) {
-        console.error('处理文件失败:', file.name, err)
+        console.error('File processing failed:', file.name, err)
       }
     }
 
@@ -159,16 +161,16 @@ export default function BatchSection() {
         type: 'SET_BATCH_PROGRESS',
         progress: { status: 'done', successCount },
       })
-      toast.success(`批量完成！成功生成 ${successCount}/${total} 张头像`)
+      toast.success(t('batch.batchDone', { success: successCount, total }))
     } catch (err) {
-      console.error('ZIP 生成失败:', err)
+      console.error('ZIP generation failed:', err)
       dispatch({
         type: 'SET_BATCH_PROGRESS',
-        progress: { status: 'error', errorMessage: 'ZIP 打包失败，请重试' },
+        progress: { status: 'error', errorMessage: t('batch.zipFailed') },
       })
-      toast.error('ZIP 打包失败，请重试')
+      toast.error(t('batch.zipFailed'))
     }
-  }, [batchFiles, state.batchNameMode, state.batchCsvText, state.settings, state.exportFormat, state.exportQuality, dispatch, toast])
+  }, [batchFiles, state.batchNameMode, state.batchCsvText, state.settings, state.exportFormat, state.exportQuality, dispatch, toast, t])
 
   const { batchProgress } = state
   const progressPct = batchProgress.total > 0
@@ -178,13 +180,17 @@ export default function BatchSection() {
   const statusText = (() => {
     switch (batchProgress.status) {
       case 'processing':
-        return `正在处理: ${batchProgress.currentFile} (${batchProgress.current + 1}/${batchProgress.total})`
+        return t('batch.processingFile', {
+          file: batchProgress.currentFile,
+          current: batchProgress.current + 1,
+          total: batchProgress.total,
+        })
       case 'packing':
-        return '正在打包 ZIP 文件...'
+        return t('batch.packing')
       case 'done':
-        return `完成! 成功生成 ${batchProgress.successCount}/${batchProgress.total} 张头像`
+        return t('batch.done', { success: batchProgress.successCount, total: batchProgress.total })
       case 'error':
-        return batchProgress.errorMessage || '处理失败'
+        return batchProgress.errorMessage || t('batch.error')
       default:
         return ''
     }
@@ -195,11 +201,11 @@ export default function BatchSection() {
       <Separator />
       <h4 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <Images className="h-4 w-4" />
-        批量生成
+        {t('batch.title')}
       </h4>
 
       <div className="space-y-1.5">
-        <Label>选择多张图片</Label>
+        <Label>{t('batch.selectImages')}</Label>
         <div
           className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 transition-colors cursor-pointer ${
             dragging
@@ -213,10 +219,10 @@ export default function BatchSection() {
         >
           <Upload className="h-8 w-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            拖拽图片到此处，或点击选择文件
+            {t('batch.dropHint')}
           </p>
           <p className="text-xs text-muted-foreground/60">
-            支持 JPG / PNG / GIF / WebP
+            {t('batch.formatHint')}
           </p>
           <input
             ref={fileInputRef}
@@ -232,14 +238,14 @@ export default function BatchSection() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                已选择 {batchFiles.length} 张图片
+                {t('batch.selectedCount', { count: batchFiles.length })}
               </span>
               <button
                 type="button"
                 className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                 onClick={clearFiles}
               >
-                清空全部
+                {t('batch.clearAll')}
               </button>
             </div>
             <div className="flex flex-wrap gap-1">
@@ -264,22 +270,22 @@ export default function BatchSection() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="batch-name-mode">名称模式</Label>
+        <Label htmlFor="batch-name-mode">{t('batch.nameMode')}</Label>
         <SimpleSelect
           id="batch-name-mode"
           value={state.batchNameMode}
           onValueChange={(v) => dispatch({ type: 'SET_BATCH_NAME_MODE', mode: v as 'filename' | 'fixed' | 'csv' })}
         >
-          <SelectOption value="filename">使用文件名作为球员名称</SelectOption>
-          <SelectOption value="fixed">所有图片使用上方填写的名称</SelectOption>
-          <SelectOption value="csv">CSV 映射（文件名,球员名）</SelectOption>
+          <SelectOption value="filename">{t('batch.nameMode.filename')}</SelectOption>
+          <SelectOption value="fixed">{t('batch.nameMode.fixed')}</SelectOption>
+          <SelectOption value="csv">{t('batch.nameMode.csv')}</SelectOption>
         </SimpleSelect>
       </div>
 
       {state.batchNameMode === 'csv' && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="batch-csv">CSV 映射数据</Label>
+            <Label htmlFor="batch-csv">{t('batch.csvData')}</Label>
             <Button
               variant="ghost"
               size="sm"
@@ -287,7 +293,7 @@ export default function BatchSection() {
               onClick={() => csvInputRef.current?.click()}
             >
               <FileUp className="h-3.5 w-3.5" />
-              导入 CSV
+              {t('batch.importCsv')}
             </Button>
             <input
               ref={csvInputRef}
@@ -300,7 +306,7 @@ export default function BatchSection() {
           <Textarea
             id="batch-csv"
             rows={4}
-            placeholder={'每行格式: 文件名,球员名\n例如:\nphoto1.jpg,Messi\nphoto2.jpg,Ronaldo'}
+            placeholder={t('batch.csvPlaceholder')}
             value={state.batchCsvText}
             onChange={(e) => dispatch({ type: 'SET_BATCH_CSV', text: e.target.value })}
           />
@@ -321,7 +327,7 @@ export default function BatchSection() {
         variant="secondary"
       >
         <Cog className="h-4 w-4" />
-        {batchProgress.status === 'processing' ? '正在处理...' : '批量生成并下载 ZIP'}
+        {batchProgress.status === 'processing' ? t('batch.processing') : t('batch.generate')}
       </Button>
     </div>
   )

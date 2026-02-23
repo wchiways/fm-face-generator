@@ -1,7 +1,7 @@
 {
   "name": "gunzo-faces",
   "private": true,
-  "version": "26.0.8",
+  "version": "26.0.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,27 +9,29 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@base-ui-components/react": "^1.0.0-rc.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "file-saver": "^2.0.5",
+    "i18next": "^25.8.13",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.0.0",
+    "radix-ui": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "radix-ui": "^1.0.0",
-    "@base-ui-components/react": "^1.0.0-rc.0",
-    "motion": "^12.0.0",
-    "lucide-react": "^0.468.0",
     "react-easy-crop": "^5.1.0",
-    "jszip": "^3.10.1",
-    "file-saver": "^2.0.5",
-    "clsx": "^2.1.1",
+    "react-i18next": "^16.5.4",
     "tailwind-merge": "^2.6.0",
-    "class-variance-authority": "^0.7.1",
     "tw-animate-css": "^1.2.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",
-    "@tailwindcss/vite": "^4.0.0",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.7.0",
     "vite": "^6.0.0"
